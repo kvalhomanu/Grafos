@@ -1,0 +1,166 @@
+from grafo import Grafo
+
+g = Grafo()
+nome = []
+
+#Adiciona Vertices
+def vertices():
+    try:
+        N = input("Informe os vértices separados por vírgula e espaço: ").split(", ")
+        for i in range(len(N)):
+            g.adicionaVertice(N[i])
+    except:
+        print("Revalide a entrada!")
+        return N
+
+#Adiciona Arestas
+def arestas():
+    A = input("Informe as arestas seguido dos vértices que ela conecta: ").split(", ")
+    for i in range(len(A)):
+        nome.append(A[i].split("("))
+        nome[-1][1]= nome[-1][1].replace(')','')
+        g.adicionaAresta(nome[-1][0],nome[-1][1])
+    return A, nome
+
+#Verifica a incidencia de um vertice atraves das arestas
+def incidencia_vertice():
+    try: #testa incidencia(Usuario informa o vertice)
+        incidencia_V = input("Informe o vertice para saber a incidência: ")
+        for x in range(len(g.N)):
+            for z in range(len(g.N)):
+                if incidencia_V + "-" + g.N[z] in nome[x][1] or g.N[z] + "-" + incidencia_V in nome[x][1]:
+                    print( nome[x][1], "Incide em ", incidencia_V)
+    except IndexError:
+        print()
+
+#Não conseguir por Matriz
+def grau_vertice(matriz, V_grau):
+    try:
+        grau = 0
+        for x in range(len(nome)):
+            for z in range(len(g.N)):
+                if V_grau + "-" + g.N[z] in nome[x][1] or g.N[z] + "-" + V_grau in nome[x][1]:
+                    grau += 1
+        return grau
+    except IndexError:
+        pass
+
+#Matriz ja
+def vertices_nao_adjacente(matriz):
+    lista_nao_adjacantes = []
+    for i in range(len(matriz)):
+        for j in range(len(matriz[i])):
+            if matriz[i][j] == 0 and g.N[j] + "-" + g.N[i] not in nome[i][1]:
+                lista_nao_adjacantes.append((g.N[j] + "-" + g.N[i]))
+
+    return lista_nao_adjacantes
+
+#Matriz ja
+def verifica_adjacente(matriz):
+    tabular(matriz)
+    for x in range(len(matriz)):
+        for z in range(len(matriz)):
+            if matriz[x][z] > 0:
+                return True
+    return False
+
+#Matriz ja
+def matriz_adjacencia():
+    matriz = []
+    lista = []
+
+    for i in g.A.values():
+        lista.append(i)
+
+    for i in range(len(g.N)):
+        matriz.append([])
+        for j in range(len(g.N)):
+            if g.N[i] + "-" + g.N[j] in lista:
+                matriz[i].append(1)
+            else:
+                matriz[i].append(0)
+    return matriz
+
+#Matriz Ja
+def tabular (matriz):
+    for x in range(len(matriz)):
+        for z in range(len(matriz[x])):
+            if (z - 1) < len(matriz[x]):
+                print(matriz[x][z], end=" ")
+            else:
+                print(matriz[x][z], end="")
+        print("\n")
+
+#Matriz Ja
+def verifica_lacos(matriz):
+    for x in range(len(matriz)):
+            if matriz[x][x] > 0:
+                return True
+    return False
+
+#Matriz ja
+def verifica_paralelo(matriz):
+    for u in range(len(matriz)): # Verifica paralelos
+        for h in range(len(matriz)):
+            if (matriz[u][h] == 1) and (matriz[h][u] == 1) and (u != h):
+                return True
+            elif matriz[u][h] > 1:
+                return True
+    return False
+
+#Matriz ja
+def verifica_completo(matriz):
+    for i in range(len(matriz)):
+        for j in range(len(matriz[i])):
+            if matriz[i][j] == 0 and i != j:
+                return False
+    return True
+
+vertices()
+arestas()
+
+while True:
+    op = input("O Que deseja realizar: \n a - Verificar adjacentes "
+               "\n b - Verificar laços \n c - Verificar paralelos "
+               "\n d - Incidencia dos vertices  \n e - Grau do vertice "
+               "\n f - Verifica completo \n m - Matriz de Adjacencia \n n - Não adjacentes \n t - Imprimir Matriz \n Finalizar ( fim ) \n").lower()
+
+    if op == "a":       #Verifica se um vertice é "vizinho" de outro, atraves de um aresta
+        print(verifica_adjacente(matriz_adjacencia()))
+
+    elif op == "b":         #É uma aresta que conecta um vértice a ele mesmo
+        print(verifica_lacos(matriz_adjacencia()))
+
+    elif op == "c":      #Quando há duas arestas entre os mesmos vertices
+        print(verifica_paralelo(matriz_adjacencia()))
+
+    elif op == "d":    #Verifica a incidencia de um vertice atraves das arestas
+        incidencia_vertice()
+
+    elif op == "e":          #Verifica o grau do vertice
+        V_grau = input("Informe o vertice a saber o grau: ")
+        grau = grau_vertice(matriz_adjacencia(), V_grau)
+        print(grau)
+
+    elif op == "f":      #Verifica se o grau é completo
+        print(verifica_completo(matriz_adjacencia()))
+
+    elif op == "m":     #Verifica Matriz de adjacencia
+        matriz_adjacencia()
+
+    elif op == "n":
+        print(vertices_nao_adjacente(matriz_adjacencia()))
+    elif op == "t":
+        tabular(matriz_adjacencia())
+
+    else:
+        print("Opção invalida \n")
+        op = input("O Que deseja realizar: \n a - Verificar adjacentes "
+           "\n b - Verificar laços \n c - Verificar paralelos "
+           "\n d - Incidencia dos vertices  \n e - Grau do vertice "
+           "\n f - Verifica completo \n m - Matriz de Adjacencia \n n - Não adjacentes \n t - Imprimir Matriz \n Finalizar ( fim ) \n").lower()
+
+'''
+A, B, C, D
+a1(A-B), a2(A-C), a3(A-D), a4(B-C), a5(B-D), a6(D-C)
+'''

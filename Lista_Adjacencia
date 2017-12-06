@@ -1,0 +1,146 @@
+from grafo import Grafo
+
+g = Grafo()
+nome = []
+
+#Adiciona Vertices
+def vertices():
+    try:
+        N = input("Informe os vértices separados por vírgula e espaço: ").split(", ")
+        for i in range(len(N)):
+            g.adicionaVertice(N[i])
+    except:
+        print("Revalide a entrada!")
+        return N
+
+#Adiciona Arestas
+def arestas():
+    A = input("Informe as arestas seguido dos vértices que ela conecta: ").split(", ")
+    for i in range(len(A)):
+        nome.append(A[i].split("("))
+        nome[-1][1]= nome[-1][1].replace(')','')
+        g.adicionaAresta(nome[-1][0],nome[-1][1])
+    return A, nome
+
+#Verifica a incidencia de um vertice atraves das arestas
+def incidencia_vertice():
+    try: #testa incidencia(Usuario informa o vertice)
+        incidencia_V = input("Informe o vertice para saber a incidência: ")
+        grau = 0
+        for x in range(len(g.N)):
+            for z in range(len(g.N)):
+                if incidencia_V + "-" + g.N[z] in nome[x][1] or g.N[z] + "-" + incidencia_V in nome[x][1]:
+                    print( nome[x][1], "Incide em ", incidencia_V)
+    except IndexError:
+        print()
+
+#Verifica o grau do vertice indicado
+def grau_vertice(V_grau):
+    try:
+        grau = 0
+        for x in range(len(nome)):
+            for z in range(len(g.N)):
+                if V_grau + "-" + g.N[z] in nome[x][1] or g.N[z] + "-" + V_grau in nome[x][1]:
+                    grau += 1
+        return grau
+    except IndexError:
+        print()
+
+#Verifica se um vertice é "vizinho" de outro, atraves de um aresta
+def verifica_adjacente():
+    try:
+        for x in range(len(g.N)):
+            for z in range(len(g.N)):
+                if g.N[x] + "-" + g.N[z] in nome[x][1] or g.N[z] + "-" + g.N[x] in nome[x][1]:
+                    continue
+                else:
+                    print(g.N[x], "e", g.N[z], "não são pares adjacentes!")
+    except IndexError:
+        print()
+
+#Verifica se uma aresta conecta um vértice a ele mesmo
+def verifica_lacos():
+    try: # Verifica laços
+        for u in range(len(g.N)):
+            for h in range(len(g.A)):
+                if g.N[u] + "-" + g.N[u] in nome[h][1]:
+                    return True
+        return False
+    except IndexError:
+        print()
+
+#Verifica se há duas arestas entre os mesmos vertices
+def verifica_paralelo():
+    try:
+        paralelas = 0
+        for u in range(len(g.A)): # Verifica paralelos
+            if paralelas < 2:
+                paralelas = 0
+                for h in range(len(g.A)):
+                    if nome[u][1] in nome[h][1]:
+                        paralelas += 1
+            else:
+                return True
+        return False
+    except:
+        print("Deu erro!")
+
+#Verifica se o grau é completo
+def verifica_completo():
+    conta = 0
+    laco = verifica_lacos()
+    par = verifica_paralelo()
+    print(laco)
+    print(par)
+    if ( laco == False ) and ( par == False ):
+        for a in range(len(g.N)):
+            if grau_vertice(g.N[a]) == (len(g.N) - 1):
+                conta += 1
+        if conta == len(g.N):
+            print("O grafo é completo")
+        else:
+            print("O grafo não é completo")
+    else:
+        print("O grafo não é completo")
+
+
+'''Grafo completo é o grafo simples em que, para cada vértice do grafo, 
+existe uma aresta conectando este vértice a cada um dos demais. 
+Ou seja, todos os vértices do grafo possuem mesmo grau'''
+
+
+vertices()
+arestas()
+op = input("O Que deseja realizar: \n a - Verificar adjacentes "
+           "\n b - Verificar laços \n c - Verificar paralelos "
+           "\n d - Incidencia dos vertices  \n e - Grau do vertice "
+           "\n f - Verifica completo \n Finalizar ( fim ) \n").lower()
+
+
+while op != 'fim':
+    if op == "a":       #Verifica se um vertice é "vizinho" de outro, atraves de um aresta
+        verifica_adjacente()
+        break
+    elif op == "b":         #É uma aresta que conecta um vértice a ele mesmo
+        print(verifica_lacos())
+        break
+    elif op == "c":      #Quando há duas arestas entre os mesmos vertices
+        print(verifica_paralelo())
+        break
+    elif op == "d":    #Verifica a incidencia de um vertice atraves das arestas
+        incidencia_vertice()
+        break
+    elif op == "e":          #Verifica o grau do vertice
+        V_grau = input("Informe o vertice a saber o grau: ")
+        grau = grau_vertice(V_grau)
+        print(grau)
+        break
+    elif op == "f":      #Verifica se o grau é completo
+        verifica_completo()
+        break
+    else:
+        print("Opção invalida \n")
+        op = input("O Que deseja realizar: \n a - Verificar adjacentes "
+           "\n b - Verificar laços \n c - Verificar paralelos "
+           "\n d - Incidencia dos vertices  \n e - Grau do vertice "
+           "\n f - Verifica completo \n Finalizar ( fim ) \n").lower()

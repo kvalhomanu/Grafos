@@ -1,61 +1,52 @@
 from grafo import Grafo
 
 g = Grafo()
-nome = []
 
-#Adiciona Vertices
 def vertices():
-    try:
-        N = input("Informe os vértices separados por vírgula e espaço: ").split(", ")
-        for i in range(len(N)):
-            g.adicionaVertice(N[i])
-    except:
-        print("Revalide a entrada!")
-        return N
+    N = input("Informe os vértices separados por vírgula e espaço: ").split(", ")
+    for i in N:
+        g.adicionaVertice(i)
 
-#Adiciona Arestas
+    return N
+
 def arestas():
     A = input("Informe as arestas seguido dos vértices que ela conecta: ").split(", ")
     for i in range(len(A)):
-        nome.append(A[i].split("("))
-        nome[-1][1]= nome[-1][1].replace(')','')
-        g.adicionaAresta(nome[-1][0],nome[-1][1])
-    return A, nome
+        A[i] = A[i].replace(")", "")
+        A[i] = A[i].split("(")
+        g.adicionaAresta(A[i][0], A[i][1])
+    return A
 
-#Verifica a incidencia de um vertice atraves das arestas
 def incidencia_vertice():
-    try: #testa incidencia(Usuario informa o vertice)
+    try:  # testa incidencia(Usuario informa o vertice)
         incidencia_V = input("Informe o vertice para saber a incidência: ")
         for x in range(len(g.N)):
             for z in range(len(g.N)):
-                if incidencia_V + "-" + g.N[z] in nome[x][1] or g.N[z] + "-" + incidencia_V in nome[x][1]:
-                    print( nome[x][1], "Incide em ", incidencia_V)
+                if incidencia_V + "-" + g.N[z] in A[x][1] or g.N[z] + "-" + incidencia_V in A[x][1]:
+                    print(A[x][1], "Incide em ", incidencia_V)
     except IndexError:
         print()
 
-#Não conseguir por Matriz
 def grau_vertice(matriz, V_grau):
     try:
         grau = 0
-        for x in range(len(nome)):
+        for x in range(len(A)):
             for z in range(len(g.N)):
-                if V_grau + "-" + g.N[z] in nome[x][1] or g.N[z] + "-" + V_grau in nome[x][1]:
+                if V_grau + "-" + g.N[z] in A[x][1] or g.N[z] + "-" + V_grau in A[x][1]:
                     grau += 1
         return grau
     except IndexError:
         pass
 
-#Matriz ja
 def vertices_nao_adjacente(matriz):
     lista_nao_adjacantes = []
     for i in range(len(matriz)):
         for j in range(len(matriz[i])):
-            if matriz[i][j] == 0 and g.N[j] + "-" + g.N[i] not in nome[i][1]:
+            if matriz[i][j] == 0 and g.N[j] + "-" + g.N[i] not in A[i][1]:
                 lista_nao_adjacantes.append((g.N[j] + "-" + g.N[i]))
 
     return lista_nao_adjacantes
 
-#Matriz ja
 def verifica_adjacente(matriz):
     tabular(matriz)
     for x in range(len(matriz)):
@@ -64,14 +55,11 @@ def verifica_adjacente(matriz):
                 return True
     return False
 
-#Matriz ja
 def matriz_adjacencia():
     matriz = []
     lista = []
-
     for i in g.A.values():
         lista.append(i)
-
     for i in range(len(g.N)):
         matriz.append([])
         for j in range(len(g.N)):
@@ -81,8 +69,7 @@ def matriz_adjacencia():
                 matriz[i].append(0)
     return matriz
 
-#Matriz Ja
-def tabular (matriz):
+def tabular(matriz):
     for x in range(len(matriz)):
         for z in range(len(matriz[x])):
             if (z - 1) < len(matriz[x]):
@@ -91,16 +78,14 @@ def tabular (matriz):
                 print(matriz[x][z], end="")
         print("\n")
 
-#Matriz Ja
 def verifica_lacos(matriz):
     for x in range(len(matriz)):
-            if matriz[x][x] > 0:
-                return True
+        if matriz[x][x] > 0:
+            return True
     return False
 
-#Matriz ja
 def verifica_paralelo(matriz):
-    for u in range(len(matriz)): # Verifica paralelos
+    for u in range(len(matriz)):  # Verifica paralelos
         for h in range(len(matriz)):
             if (matriz[u][h] == 1) and (matriz[h][u] == 1) and (u != h):
                 return True
@@ -108,7 +93,6 @@ def verifica_paralelo(matriz):
                 return True
     return False
 
-#Matriz ja
 def verifica_completo(matriz):
     for i in range(len(matriz)):
         for j in range(len(matriz[i])):
@@ -116,51 +100,117 @@ def verifica_completo(matriz):
                 return False
     return True
 
-vertices()
-arestas()
+def Conexos(aresta, vertice, matriz):
+    lista = set()
+    indiceVertice = N.index(vertice)
+    for i in aresta:
+        j = N.index(i[1])
+        if matriz[indiceVertice][j] > 0 and i[0] == vertice:
+            lista.add(i[1])
+    return lista
+
+def pecorreGrafo(aresta,inicio, matriz):
+    pilha = [inicio]
+    visitados = set()
+    while pilha:
+        vertice = pilha.pop()
+        if vertice not in visitados:
+            visitados.add(vertice)
+            pilha.extend(Conexos(aresta, vertice, matriz) - visitados)
+    return visitados
+
+def grafoConexo(aresta,matriz):
+    for i in N:
+        if len(N) != len(pecorreGrafo(aresta, i, matriz)):
+            return False
+    return True
+
+def Euleriano(matriz):
+    try:
+        total = 0
+        i = 0
+        while((total <= 2) and (i <= len(matriz))):
+            caminho = 0
+            for j in range(len(matriz)):
+                caminho += matriz[i][j]
+                if(caminho %2 != 0):
+                    total += 1
+                i += 1
+            if total > 2:
+                print("Não há Caminho Euleriano.")
+            else:
+                print("Há Caminho Euleriano.")
+    except IndexError:
+        print()
+
+def Asemtraço(A):
+    paresemtraço = []
+    for i in A:
+        paresemtraço.append(i[1])
+    for i in range(len(paresemtraço)):
+        paresemtraço[i] = paresemtraço[i].split("-")
+    return paresemtraço
+
+N = vertices()
+A = arestas()
 
 while True:
     op = input("O Que deseja realizar: \n a - Verificar adjacentes "
                "\n b - Verificar laços \n c - Verificar paralelos "
                "\n d - Incidencia dos vertices  \n e - Grau do vertice "
-               "\n f - Verifica completo \n m - Matriz de Adjacencia \n n - Não adjacentes \n t - Imprimir Matriz \n Finalizar ( fim ) \n").lower()
+               "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n m - Matriz de Adjacencia \n n - Não adjacentes \n t - Imprimir Matriz \n Finalizar ( fim ) \n").lower()
 
-    if op == "a":       #Verifica se um vertice é "vizinho" de outro, atraves de um aresta
+    if op == "a":  # Verifica se um vertice eh "vizinho" de outro, atraves de um aresta
         print(verifica_adjacente(matriz_adjacencia()))
 
-    elif op == "b":         #É uma aresta que conecta um vértice a ele mesmo
+    elif op == "b":  # Eh uma aresta que conecta um vertice a ele mesmo
         print(verifica_lacos(matriz_adjacencia()))
 
-    elif op == "c":      #Quando há duas arestas entre os mesmos vertices
+    elif op == "c":  # Quando ha duas arestas entre os mesmos vertices
         print(verifica_paralelo(matriz_adjacencia()))
 
-    elif op == "d":    #Verifica a incidencia de um vertice atraves das arestas
+    elif op == "d":  # Verifica a incidencia de um vertice atraves das arestas
         incidencia_vertice()
 
-    elif op == "e":          #Verifica o grau do vertice
+    elif op == "e":  # Verifica o grau do vertice
         V_grau = input("Informe o vertice a saber o grau: ")
         grau = grau_vertice(matriz_adjacencia(), V_grau)
         print(grau)
 
-    elif op == "f":      #Verifica se o grau é completo
+    elif op == "f":  # Verifica se o grau eh completo
         print(verifica_completo(matriz_adjacencia()))
+        
+    elif op == "g":  #Verifica se ha caminhos eulirianos
+        print(Euleriano(matriz_adjacencia()))
 
-    elif op == "m":     #Verifica Matriz de adjacencia
+    elif op == "h":  #Verifica se o grafo eh conexo
+        print(grafoConexo(Asemtraço(A), matriz_adjacencia()))
+
+    elif op == "m":  # Verifica Matriz de adjacencia
         matriz_adjacencia()
 
-    elif op == "n":
+    elif op == "n":  # Informa os vertices nao adjacentes
         print(vertices_nao_adjacente(matriz_adjacencia()))
-    elif op == "t":
+
+    elif op == "t":  # Imprime de formar tabulada a matriz
         tabular(matriz_adjacencia())
 
+    elif op == "fim":
+        break
+        
     else:
         print("Opção invalida \n")
         op = input("O Que deseja realizar: \n a - Verificar adjacentes "
-           "\n b - Verificar laços \n c - Verificar paralelos "
-           "\n d - Incidencia dos vertices  \n e - Grau do vertice "
-           "\n f - Verifica completo \n m - Matriz de Adjacencia \n n - Não adjacentes \n t - Imprimir Matriz \n Finalizar ( fim ) \n").lower()
+                   "\n b - Verificar laços \n c - Verificar paralelos "
+                   "\n d - Incidencia dos vertices  \n e - Grau do vertice "
+                   "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n m - Matriz de Adjacencia \n n - Não adjacentes \n t - Imprimir Matriz \n Finalizar ( fim ) \n").lower()
+
 
 '''
+#conexo
+A, B, C, D
+a1(A-B), a2(B-C), a3(C-D), a4(D-A)
+#completo
 A, B, C, D
 a1(A-B), a2(A-C), a3(A-D), a4(B-C), a5(B-D), a6(D-C)
 '''

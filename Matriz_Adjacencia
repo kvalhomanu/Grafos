@@ -135,11 +135,12 @@ def Euleriano(matriz):
                 caminho += matriz[i][j]
                 if(caminho %2 != 0):
                     total += 1
-                i += 1
-            if total > 2:
-                print("Não há Caminho Euleriano.")
-            else:
-                print("Há Caminho Euleriano.")
+            i += 1
+        print(total)
+        if total > 2:
+            print("Não há Caminho Euleriano.")
+        else:
+            print("Há Caminho Euleriano.")
     except IndexError:
         print()
 
@@ -151,6 +152,17 @@ def Asemtraço(A):
         paresemtraço[i] = paresemtraço[i].split("-")
     return paresemtraço
 
+def Warshall(matriz):
+    Warshall = matriz.copy()
+
+    for i in range(len(matriz)):
+        for j in range(len(matriz)):
+            if (Warshall[j][i] >= 1):
+                for k in range(len(matriz)):
+                    Warshall[j][k] = max(Warshall[j][k], Warshall[i][k])
+                    print(Warshall)
+
+
 N = vertices()
 A = arestas()
 
@@ -158,7 +170,7 @@ while True:
     op = input("O Que deseja realizar: \n a - Verificar adjacentes "
                "\n b - Verificar laços \n c - Verificar paralelos "
                "\n d - Incidencia dos vertices  \n e - Grau do vertice "
-               "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n m - Matriz de Adjacencia \n n - Não adjacentes \n t - Imprimir Matriz \n Finalizar ( fim ) \n").lower()
+               "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n i - Matriz de Adjacencia \n j - Não adjacentes \n k - Imprimir Matriz \n l - Warshall \n Finalizar ( fim ) \n").lower()
 
     if op == "a":  # Verifica se um vertice eh "vizinho" de outro, atraves de um aresta
         print(verifica_adjacente(matriz_adjacencia()))
@@ -179,31 +191,34 @@ while True:
 
     elif op == "f":  # Verifica se o grau eh completo
         print(verifica_completo(matriz_adjacencia()))
-        
-    elif op == "g":  #Verifica se ha caminhos eulirianos
+
+    elif op == "g":
         print(Euleriano(matriz_adjacencia()))
 
     elif op == "h":  #Verifica se o grafo eh conexo
         print(grafoConexo(Asemtraço(A), matriz_adjacencia()))
 
-    elif op == "m":  # Verifica Matriz de adjacencia
+    elif op == "i":  # Verifica Matriz de adjacencia
         matriz_adjacencia()
 
-    elif op == "n":  # Informa os vertices nao adjacentes
+    elif op == "j":  # Informa os vertices nao adjacentes
         print(vertices_nao_adjacente(matriz_adjacencia()))
 
-    elif op == "t":  # Imprime de formar tabulada a matriz
+    elif op == "k":  # Imprime de formar tabulada a matriz
         tabular(matriz_adjacencia())
+
+    elif op == "l":  # Warshall
+        Warshall(matriz_adjacencia())
 
     elif op == "fim":
         break
-        
+
     else:
         print("Opção invalida \n")
         op = input("O Que deseja realizar: \n a - Verificar adjacentes "
                    "\n b - Verificar laços \n c - Verificar paralelos "
                    "\n d - Incidencia dos vertices  \n e - Grau do vertice "
-                   "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n m - Matriz de Adjacencia \n n - Não adjacentes \n t - Imprimir Matriz \n Finalizar ( fim ) \n").lower()
+                   "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n i - Matriz de Adjacencia \n j - Não adjacentes \n k - Imprimir Matriz \n l - Warshall \n Finalizar ( fim ) \n").lower()
 
 
 '''

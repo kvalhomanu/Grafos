@@ -12,7 +12,7 @@ def vertices():
 def arestas():
     A = input("Informe as arestas seguido dos vértices que ela conecta: ").split(", ")
     for i in range(len(A)):
-        A[i] = A[i].replace(")", "")
+        A[i] = A[i].replace(")", "(")
         A[i] = A[i].split("(")
         g.adicionaAresta(A[i][0], A[i][1])
     return A
@@ -125,28 +125,32 @@ def grafoConexo(aresta,matriz):
             return False
     return True
 
-def Euleriano(matriz):
+def Euleriano(conexo,matriz):
     try:
-        total = 0
-        i = 0
-        while((total <= 2) and (i <= len(matriz))):
-            caminho = 0
-            for j in range(len(matriz)):
-                caminho += matriz[i][j]
-                if(caminho %2 != 0):
-                    total += 1
-            i += 1
-        print(total)
-        if total > 2:
-            print("Não há Caminho Euleriano.")
-        else:
-            print("Há Caminho Euleriano.")
-    except IndexError:
-        print()
+        if(conexo == True):
+            grau = []
+            total = 0
 
-def Asemtraço(A):
+            for i in range(len(matriz)):
+                grau.append(grau_vertice(matriz,g.N[i]))
+
+            for j in range(len(grau)):
+                if(grau[j]%2 != 0):
+                    total += 1
+
+            if total == 0 or total == 2:
+                print("há Caminho Euleriano.")
+            else:
+                print("Não há Caminho Euleriano.")
+
+        else:
+            print("Não há Caminho Euleriano.")
+    except IndexError:
+        print("")
+
+def Asemtraço():
     paresemtraço = []
-    for i in A:
+    for i in g.A:
         paresemtraço.append(i[1])
     for i in range(len(paresemtraço)):
         paresemtraço[i] = paresemtraço[i].split("-")
@@ -160,68 +164,206 @@ def Warshall(matriz):
             if (Warshall[j][i] >= 1):
                 for k in range(len(matriz)):
                     Warshall[j][k] = max(Warshall[j][k], Warshall[i][k])
-                    print(Warshall)
+    print(Warshall)
 
+def pesoArcos(A):
+    lista = []
+    for i in range(len(A)):
+        lista.append(int(A[i][2]))
+    return lista
+
+def listaAresta(A):
+    lista = []
+    for i in range(len(A)):
+        lista.append(A[i][1])
+    return lista
+
+def matrizDijkstra(listaPesoArestas,listaArestas):
+
+    matriz_adj = []
+
+    for i in range(len(N)): #Cria a matriz vazia
+        matriz_adj.append([])
+        for j in range(len(N)):
+            matriz_adj[i].append([])
+
+    lista_resultado = []
+
+    for i in range(len(N)):  #Informa a lista de pesos e seus respectivos indices
+        for j in range(len(N)):
+            if N[i] + "-" + N[j] in listaArestas:
+                lista_resultado.append(listaPesoArestas[listaArestas.index(N[i] + "-" + N[j])])
+
+            else:
+                lista_resultado.append(0)
+
+    cont = 0;
+
+    for linha in range(len(N)):  # Preenchendo a matriz com os pesos
+        for coluna in range(len(N)):
+            matriz_adj[linha][coluna] = lista_resultado[cont]
+            cont += 1
+
+    print("            ", end="")
+    for i in range(len(g.N)):
+        print(N[i], end=" ")
+    print("")
+
+    for linha in range(len(g.N)):  #Impressão da matriz
+        print("          ", end="")
+        print(g.N[linha], end="")
+        print(" ", end="")
+        for coluna in range(len(g.N)):
+            print(matriz_adj[linha][coluna], end=" ")
+        print("\n")
+
+def Dijkstra():
+    listaPesoArestas = pesoArcos(A)
+    listaArestas = listaAresta(A)
+    #matrizDijkstra(listaPesoArestas,listaArestas)
+
+    verticeInicial = input("Digite o vértice da inicial do caminho: ")
+
+    for i in range(len(g.N)):  # Verifica indice na lista de Vertices
+        if (verticeInicial == N[i]):
+            indice_u = i
+
+    verticeFinal = input("Digite o vértice do final do caminho: ")
+
+    for i in range(len(g.N)):  # Verifica indice na lista de Vertices
+        if (verticeFinal == N[i]):
+            indice_v = i
+
+    lista_beta = N[:]
+    lista_phi = N[:]
+    lista_pi = N[:]
+    lista_pi[0] = 0
+
+    # Preenchendo as coluna dos pesos (BETA) com "0" no "W" e infinito (1000) no resto
+    for i in range(len(N)):
+        if (i != indice_u):
+            lista_beta[i] = 1000;
+        else:
+            lista_beta[i] = 0;
+
+    # Preenchendo as coluna dos estados (Phi) com "1" no "W" e  "0" no resto
+    for i in range(len(N)):
+        if (i != indice_u):
+            lista_phi[i] = 0;
+        else:
+            lista_phi[i] = 1;
+
+    valor_um_lista_phi = 1
+    caminho_encontrado = 0
+    lista_beta_sem_u = lista_beta[:]
+    lista_beta_sem_u[indice_u] = 1000
+    cont = 0
+
+    # Preenchendo os Betas e os Pi de todos os arcos existentes
+    while (valor_um_lista_phi == 1 and caminho_encontrado == 0):
+        for i in range(len(N)):
+            for j in range(len(N)):
+                if (g.N[i] + "-" + g.N[j] in listaArestas):
+                    w = g.N[i]
+                    r = g.N[j]
+                    if (lista_phi[j] == 0 and (lista_beta[j] > (lista_beta[i] + listaPesoArestas[listaArestas.index(g.N[i] + "-" + g.N[j])]))):
+                        lista_beta_sem_u[j] = (lista_beta[i] + listaPesoArestas[listaArestas.index(g.N[i] + "-" + g.N[j])])
+                        lista_beta[j] = (lista_beta[i] + listaPesoArestas[listaArestas.index(g.N[i] + "-" + g.N[j])])
+                        lista_pi[j] = g.N[i]
+
+        # Análise do *r e preenchimento da coluna do Phi e verificação se esse *r é igual a u. Se for sai imediatamente do loop
+        for i in range(len(lista_phi)):
+            if (lista_phi[i] == 0 and lista_beta_sem_u[i] < 1000 and lista_beta_sem_u[i] > 0 and lista_beta_sem_u[
+                i] == min(lista_beta_sem_u)):
+                lista_phi[i] = 1
+                lista_beta_sem_u[i] = 1000
+                valor_um_lista_phi = 1
+                if (N[i] == verticeFinal):
+                    caminho_encontrado = 1
+                    break
+                break
+            else:
+                valor_um_lista_phi = 0
+
+    print("\n")
+    # Coleta da lista de predecessores apenas para o caminho solicitado
+    if (caminho_encontrado == 1):
+        print("O menor caminho para os dois vértices informados é: ", end="")
+        lista_menor_caminho = []
+        indice_temp = indice_v
+        lista_menor_caminho.append(verticeFinal)
+        while (lista_pi[indice_temp] != verticeInicial):
+            lista_menor_caminho.append(lista_pi[indice_temp])
+            indice_temp = N.index(lista_pi[indice_temp])
+        lista_menor_caminho.append(verticeInicial)
+        lista_menor_caminho.reverse()
+        for i in range(len(lista_menor_caminho)):
+            print(lista_menor_caminho[i], end="")
+            if (i < len(lista_menor_caminho) - 1):
+                print(" -> ", end="")
+        print("\n")
+    else:
+        print("Não existe caminho para os vértices informados !")
 
 N = vertices()
 A = arestas()
 
-while True:
-    op = input("O Que deseja realizar: \n a - Verificar adjacentes "
+op = input("O Que deseja realizar: \n a - Verificar adjacentes "
                "\n b - Verificar laços \n c - Verificar paralelos "
                "\n d - Incidencia dos vertices  \n e - Grau do vertice "
-               "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n i - Matriz de Adjacencia \n j - Não adjacentes \n k - Imprimir Matriz \n l - Warshall \n Finalizar ( fim ) \n").lower()
+               "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n i - Matriz de Adjacencia \n j - Não adjacentes \n k - Imprimir Matriz \n l - Warshall \n m - Dijkstra \n Finalizar ( fim ) \n").lower()
 
-    if op == "a":  # Verifica se um vertice eh "vizinho" de outro, atraves de um aresta
-        print(verifica_adjacente(matriz_adjacencia()))
+if op == "a":  # Verifica se um vertice eh "vizinho" de outro, atraves de um aresta
+    print(verifica_adjacente(matriz_adjacencia()))
 
-    elif op == "b":  # Eh uma aresta que conecta um vertice a ele mesmo
-        print(verifica_lacos(matriz_adjacencia()))
+elif op == "b":  # Eh uma aresta que conecta um vertice a ele mesmo
+    print(verifica_lacos(matriz_adjacencia()))
 
-    elif op == "c":  # Quando ha duas arestas entre os mesmos vertices
-        print(verifica_paralelo(matriz_adjacencia()))
+elif op == "c":  # Quando ha duas arestas entre os mesmos vertices
+    print(verifica_paralelo(matriz_adjacencia()))
 
-    elif op == "d":  # Verifica a incidencia de um vertice atraves das arestas
-        incidencia_vertice()
+elif op == "d":  # Verifica a incidencia de um vertice atraves das arestas
+    incidencia_vertice()
 
-    elif op == "e":  # Verifica o grau do vertice
-        V_grau = input("Informe o vertice a saber o grau: ")
-        grau = grau_vertice(matriz_adjacencia(), V_grau)
-        print(grau)
+elif op == "e":  # Verifica o grau do vertice
+    V_grau = input("Informe o vertice a saber o grau: ")
+    grau = grau_vertice(matriz_adjacencia(), V_grau)
+    print(grau)
 
-    elif op == "f":  # Verifica se o grau eh completo
-        print(verifica_completo(matriz_adjacencia()))
+elif op == "f":  # Verifica se o grau eh completo
+    print(verifica_completo(matriz_adjacencia()))
 
-    elif op == "g":
-        print(Euleriano(matriz_adjacencia()))
+elif op == "g":
+    print(Euleriano(grafoConexo(Asemtraço(A), matriz_adjacencia()), matriz_adjacencia()))
 
-    elif op == "h":  #Verifica se o grafo eh conexo
-        print(grafoConexo(Asemtraço(A), matriz_adjacencia()))
+elif op == "h":  #Verifica se o grafo eh conexo
+    print(grafoConexo(Asemtraço(A), matriz_adjacencia()))
 
-    elif op == "i":  # Verifica Matriz de adjacencia
-        matriz_adjacencia()
+elif op == "i":  # Verifica Matriz de adjacencia
+    matriz_adjacencia()
 
-    elif op == "j":  # Informa os vertices nao adjacentes
-        print(vertices_nao_adjacente(matriz_adjacencia()))
+elif op == "j":  # Informa os vertices nao adjacentes
+    print(vertices_nao_adjacente(matriz_adjacencia()))
 
-    elif op == "k":  # Imprime de formar tabulada a matriz
-        tabular(matriz_adjacencia())
+elif op == "k":  # Imprime de formar tabulada a matriz
+    tabular(matriz_adjacencia())
 
-    elif op == "l":  # Warshall
-        Warshall(matriz_adjacencia())
-
-    elif op == "fim":
-        break
-
-    else:
-        print("Opção invalida \n")
-        op = input("O Que deseja realizar: \n a - Verificar adjacentes "
-                   "\n b - Verificar laços \n c - Verificar paralelos "
-                   "\n d - Incidencia dos vertices  \n e - Grau do vertice "
-                   "\n f - Verifica completo \n g - Caminho de Euler \n h - Conexo \n i - Matriz de Adjacencia \n j - Não adjacentes \n k - Imprimir Matriz \n l - Warshall \n Finalizar ( fim ) \n").lower()
-
+elif op == "l":  # Warshall
+    Warshall(matriz_adjacencia())
+elif op == "m": #Dijkstra
+    Dijkstra()
 
 '''
+#dijkstra
+A, B, C, D, E, F, G, H, I, J
+a1(F-H)1, a2(A-F)2, a3(A-B)1, a4(A-C)1, a5(C-E)2, a6(E-A)1, a7(A-D)1, a8(B-I)3, a9(D-J)1, a10(D-G)2, a11(J-I)1, a12(D-B)2
+
+A, B, C, D, E, F
+#lista_arestas=["a1(A-B)1","a2(B-E)1","a3(B-C)1","a4(C-D)2","a5(D-F)1","a6(E-F)2
+
+#Euler
+A, B, C
+a1(A-B), a2(A-C), a3(B-C), a4(B-A), a5(C-A), a6(C-B)
 #conexo
 A, B, C, D
 a1(A-B), a2(B-C), a3(C-D), a4(D-A)

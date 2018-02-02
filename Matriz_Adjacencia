@@ -218,6 +218,7 @@ def matrizDijkstra(listaPesoArestas,listaArestas):
         print("\n")
 
 def Dijkstra():
+
     listaPesoArestas = pesoArcos(A)
     listaArestas = listaAresta(A)
     #matrizDijkstra(listaPesoArestas,listaArestas)
